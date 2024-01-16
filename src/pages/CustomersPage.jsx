@@ -1,20 +1,44 @@
 import { useState, useEffect } from "react";
-import Axios  from "axios";
 import Pagination from "../components/Pagination";
+import customersAPI from "../services/customersAPI";
 
 const CustomersPage = (props) => {
     const [customers, setCustomers] = useState([])
+
+    // filtre
+    const [search, setSearch] = useState("")
+
+    const fetchCustomers = async () => {
+        try{
+            const data = await customersAPI.findAll()
+            setCustomers(data)
+        }catch(error)
+        {
+            // notif à faire
+            console.error(error.response)
+        }
+    }
+
+    // pour les filtres
+    const handleSearch = event => {
+        const value = event.currentTarget.value 
+        setSearch(value)
+        setCurrentPage(1)
+    } 
+
+    const filteredCustomers = customers.filter(c => 
+            c.firstName.toLowerCase().includes(search.toLowerCase()) ||
+            c.lastName.toLowerCase().includes(search.toLowerCase()) ||
+            c.email.toLowerCase().includes(search.toLowerCase) || 
+            (c.company && c.company.toLowerCase().includes(search.toLowerCase()))
+        )
 
     // pour la pagination 
     const [currentPage, setCurrentPage] = useState(1)
 
     useEffect(()=>{
-        Axios.get('http://apicourse.myepse.be/api/customers')
-            .then(response => response.data['hydra:member'])
-            .then(data => setCustomers(data))
-            .catch(error => console.error(error.response))
-
-    },[])
+        fetchCustomers()
+    },[customers])
 
     // pour la pagination 
     const handlePageChange = (page) => {
@@ -23,11 +47,14 @@ const CustomersPage = (props) => {
 
     const itemsPerPage = 10
 
-    const paginatedCustomers = Pagination.getData(customers, currentPage, itemsPerPage)
+    const paginatedCustomers = Pagination.getData(filteredCustomers, currentPage, itemsPerPage)
 
     return ( 
         <>
             <h1>Liste des clients</h1>
+            <div className="form-group">
+                <input type="text" className="form-control" placeholder="Recherche..." onChange={handleSearch} value={search} />
+            </div>
             <table className="table table-hover">
                 <thead>
                     <tr>
@@ -67,12 +94,15 @@ const CustomersPage = (props) => {
                     
                 </tbody>
             </table>
-            <Pagination 
-                currentPage={currentPage}
-                itemsPerPage={itemsPerPage}
-                length={customers.length}
-                onPageChanged={handlePageChange}
-            />
+            {
+                itemsPerPage < filteredCustomers.length && 
+                <Pagination 
+                    currentPage={currentPage}
+                    itemsPerPage={itemsPerPage}
+                    length={customers.length}
+                    onPageChanged={handlePageChange}
+                />
+            }
         </>
      );
 }
