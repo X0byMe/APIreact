@@ -38,7 +38,7 @@ const CustomersPage = (props) => {
 
     useEffect(()=>{
         fetchCustomers()
-    },[customers])
+    },[])
 
     // pour la pagination 
     const handlePageChange = (page) => {
@@ -75,7 +75,7 @@ const CustomersPage = (props) => {
                             <td>{customer.firstName} {customer.lastName}</td>
                             <td>{customer.email}</td>
                             <td>{customer.company}</td>
-                            <td class="text-center">
+                            <td className="text-center">
                                 <span className="badge bg-secondary">
                                     {customer.invoices.length}
                                 </span>
