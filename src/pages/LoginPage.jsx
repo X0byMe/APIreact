@@ -1,7 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import authAPI from '../services/authAPI';
 
 const LoginPage = (props) => {
+    const navigate = useNavigate()
+    
     //Ceci est un hook qui crée un state (une variable d'état) dans react, car je dois envoyer un objet à mon API pour vérifier l'id et mot de passe du user. Donc par défaut tu as 1 objet, avec 2 paramètres : username et password. 
     const [credentials, setCredentials] = useState({
         username: "",
@@ -28,6 +31,10 @@ const LoginPage = (props) => {
         try{
             await authAPI.authenticate(credentials)
             setError("")
+            //permet de modifier les boutons de connexion de la navbar 
+            props.onLogin(true)
+            //permet de rediriger le user vers customer une fois qu'il vient de se connecter
+            navigate("/customers", {replace: true})
         }catch(error)
         {
             setError("Aucun compte ne possède cette adresse e-mail ou les iformations ne correspondent pas")
